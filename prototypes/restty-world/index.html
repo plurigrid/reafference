@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>reafference :: restty world</title>
+  <style>
+    :root {
+      --bg: #070b13;
+      --panel: #0d1220;
+      --line: #22314b;
+      --fg: #f2f6ff;
+      --muted: #92a4bd;
+      --cyan: #64e3ec;
+      --green: #38d826;
+      --amber: #f5c542;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--fg); }
+    body {
+      font-family: "JetBrains Mono", "Fira Code", monospace;
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+    header, footer {
+      padding: 12px 16px;
+      background: #0a101b;
+      border-bottom: 1px solid var(--line);
+    }
+    footer {
+      border-bottom: 0;
+      border-top: 1px solid var(--line);
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .chips {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .chip {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .chip.live { color: var(--green); border-color: rgba(56, 216, 38, 0.45); }
+    main {
+      padding: 18px;
+      display: grid;
+      grid-template-columns: 1fr minmax(220px, 280px);
+      gap: 18px;
+    }
+    .terminal {
+      position: relative;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at top left, rgba(100, 227, 236, 0.12), transparent 25%),
+        linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0));
+      min-height: 520px;
+    }
+    .terminal pre {
+      margin: 0;
+      padding: 20px;
+      color: var(--fg);
+      font-size: 13px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+    }
+    .overlay {
+      position: absolute;
+      inset: auto 18px 18px auto;
+      width: min(320px, calc(100% - 36px));
+      border: 1px solid rgba(245, 197, 66, 0.35);
+      background: rgba(12, 18, 30, 0.92);
+      border-radius: 12px;
+      padding: 14px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+    }
+    .overlay h2 {
+      margin: 0 0 8px;
+      font-size: 13px;
+      color: var(--amber);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .overlay p {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.6;
+      color: var(--muted);
+    }
+    aside {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 16px;
+      background: var(--panel);
+      display: grid;
+      align-content: start;
+      gap: 14px;
+    }
+    aside h2 {
+      margin: 0;
+      font-size: 12px;
+      color: var(--cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    aside p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+    @media (max-width: 880px) {
+      main { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="chips">
+      <span class="chip live">live world</span>
+      <span class="chip">restty host</span>
+      <span class="chip">overlay capable</span>
+      <span class="chip">reafference</span>
+    </div>
+  </header>
+  <main>
+    <section class="terminal">
+      <pre>reafference://world/entangled
+
+$ boot world
+loading substrate...
+loading replay buffer...
+loading observer state...
+
+world ready
+
+This path treats the browser as a host for one live field.
+Chrome stays thin. The terminal owns the center.
+
+Measure, annotate, replay, or attach overlays here.</pre>
+      <div class="overlay">
+        <h2>Overlay</h2>
+        <p>
+          Reserve this layer for selection, annotation, replay cursors, or cell
+          measurements. Do not turn it into a second UI.
+        </p>
+      </div>
+    </section>
+    <aside>
+      <h2>Why This Works</h2>
+      <p>Dense interaction without turning the page into a dashboard zoo.</p>
+      <p>Pairs naturally with world state, replay, and measurement.</p>
+      <p>Lets portal-shell ideas come back later as thin chrome, not structure.</p>
+    </aside>
+  </main>
+  <footer>
+    <span>mode: observe</span>
+    <span>carrier: terminal</span>
+    <span>status: warm</span>
+    <span>recommended use: live substrate</span>
+  </footer>
+</body>
+</html>

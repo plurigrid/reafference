@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>reafference :: ratzilla surface</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --panel: #121212;
+      --line: #2a2a2a;
+      --fg: #f3f5f7;
+      --muted: #8f96a3;
+      --green: #44ff44;
+      --red: #ff5f5f;
+      --yellow: #ffd86b;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--fg); }
+    body {
+      font-family: "JetBrains Mono", "Fira Code", monospace;
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      grid-template-rows: 1fr auto;
+    }
+    aside {
+      border-right: 1px solid var(--line);
+      background: #0d0d0d;
+      padding: 16px;
+      display: grid;
+      align-content: start;
+      gap: 12px;
+    }
+    aside h1 {
+      margin: 0;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    aside p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+    .legend {
+      display: grid;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .legend div {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 12px;
+    }
+    .legend .good { color: var(--green); }
+    .legend .warn { color: var(--yellow); }
+    .legend .hot { color: var(--red); }
+    main {
+      position: relative;
+      padding: 18px;
+      display: grid;
+      place-items: stretch;
+    }
+    .surface {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0));
+      padding: 18px;
+      min-height: 100%;
+    }
+    pre {
+      margin: 0;
+      color: var(--fg);
+      font-size: 13px;
+      line-height: 1.4;
+      white-space: pre-wrap;
+    }
+    footer {
+      grid-column: 1 / -1;
+      border-top: 1px solid var(--line);
+      padding: 10px 16px;
+      color: var(--muted);
+      font-size: 11px;
+      display: flex;
+      gap: 18px;
+      flex-wrap: wrap;
+      background: #0d0d0d;
+    }
+    @media (max-width: 900px) {
+      body {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr auto;
+      }
+      aside { border-right: 0; border-bottom: 1px solid var(--line); }
+    }
+  </style>
+</head>
+<body>
+  <aside>
+    <h1>reafference / ratzilla</h1>
+    <p>
+      This path treats the browser as an instrument panel. The main surface is a
+      structured cell renderer, and the rail is for legend, filter, and state.
+    </p>
+    <div class="legend">
+      <div class="good">green :: stable carrier</div>
+      <div class="warn">yellow :: pending measurement</div>
+      <div class="hot">red :: active divergence</div>
+    </div>
+  </aside>
+  <main>
+    <section class="surface">
+      <pre>reafference instrument surface
+
++---------------------------------------------------------------+
+| source    field              status                mode       |
+| portal    ratzilla surface   nominal               operator   |
++---------------------------------------------------------------+
+| observer lane      | primary cell surface                        |
+| measure queue      |                                             |
+| replay cursor      |  one structured instrument, not cards       |
+| drift counter      |  one rail, not many panels                  |
+| color state        |                                             |
++---------------------------------------------------------------+
+
+This is the most operator-facing path.
+Use it when inspection is the product.</pre>
+    </section>
+  </main>
+  <footer>
+    <span>renderer: structured browser surface</span>
+    <span>layout: instrument-first</span>
+    <span>recommended use: operator tooling</span>
+  </footer>
+</body>
+</html>
