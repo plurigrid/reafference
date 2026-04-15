@@ -1,0 +1,10 @@
+{
+  "stamp": "2026-04-15T00:00:00Z",
+  "bytes": 1360,
+  "sha256": "6b44459a9eea2337ca1bd3390d23245309c3af4f5347924688163a1c8741b478",
+  "files": {
+    "ansi": "frame.ansi",
+    "plain": "frame.txt",
+    "hex": "frame.hex.txt"
+  }
+}

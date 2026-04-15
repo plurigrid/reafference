@@ -1,0 +1,79 @@
+#!/usr/bin/env node
+
+import { existsSync } from "node:fs";
+import { readFile } from "node:fs/promises";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+import {
+  DEFAULT_STAMP,
+  buildHealthFrameBytes,
+  decodeFrameBytes,
+  frameHashHex,
+  stripAnsi,
+} from "../shared/health-frame.mjs";
+
+const binDir = dirname(fileURLToPath(import.meta.url));
+const repoRoot = resolve(binDir, "..");
+const builtFramePath = resolve(repoRoot, "build/health/frame.ansi");
+
+function usage() {
+  process.stdout.write(
+    [
+      "health",
+      "",
+      "Usage:",
+      "  health            write built frame bytes to stdout when available",
+      "  health --generated force generated frame bytes instead of built bytes",
+      "  health --plain    print the frame with ANSI stripped",
+      "  health --hash     print sha256 of the canonical frame bytes",
+      "  health --meta     print source, byte count, and sha256",
+      "  health --help     show this help",
+      "",
+      `Default stamp: ${DEFAULT_STAMP}`,
+      `Built artifact: ${builtFramePath}`,
+    ].join("\n"),
+  );
+}
+
+const args = new Set(process.argv.slice(2));
+
+if (args.has("--help")) {
+  usage();
+  process.exit(0);
+}
+
+async function loadFrameBytes() {
+  if (!args.has("--generated") && existsSync(builtFramePath)) {
+    return {
+      source: "built",
+      frameBytes: new Uint8Array(await readFile(builtFramePath)),
+    };
+  }
+
+  return {
+    source: "generated",
+    frameBytes: buildHealthFrameBytes(),
+  };
+}
+
+const { source, frameBytes } = await loadFrameBytes();
+
+if (args.has("--plain")) {
+  process.stdout.write(stripAnsi(decodeFrameBytes(frameBytes)));
+  process.exit(0);
+}
+
+if (args.has("--hash")) {
+  process.stdout.write(`${await frameHashHex(frameBytes)}\n`);
+  process.exit(0);
+}
+
+if (args.has("--meta")) {
+  process.stdout.write(`source=${source}\n`);
+  process.stdout.write(`bytes=${frameBytes.length}\n`);
+  process.stdout.write(`sha256=${await frameHashHex(frameBytes)}\n`);
+  process.exit(0);
+}
+
+process.stdout.write(Buffer.from(frameBytes));

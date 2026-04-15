@@ -1,0 +1,26 @@
+
+reafference.health  browser surface
+health            ghostty cli
+
+reafference.health :: shared health frame
+
++------------------------------+------------------------------+
+| surface                      | transport                    |
+| health cli                   | ansi frame bytes             |
+| ghostty host                 | stdout                       |
+| browser host                 | restty-ready                 |
+| canonical seam               | ansi-bytes-now               |
+| cells later                  | packed-cell-frames           |
++------------------------------+------------------------------+
+| stamp                        | 2026-04-15T00:00:00Z         |
+| mode                         | observe                      |
+| carrier                      | ghostty/restty               |
+| field                        | health                       |
+| status                       | warm                         |
++------------------------------+------------------------------+
+
+One frame generator. Two hosts. One byte stream.
+
+note: browser should consume these exact bytes before any host-specific paint
+next: promote canonical transport to packed cell frames once ANSI is stable
+verify: compare sha256 in browser against `bin/health --hash`

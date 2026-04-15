@@ -1,0 +1,11 @@
+{
+  "name": "reafference",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:health": "node scripts/build-health-artifacts.mjs",
+    "check:health": "node scripts/check-health-byte-identity.mjs",
+    "health": "node bin/health",
+    "health:hash": "node bin/health --hash"
+  }
+}

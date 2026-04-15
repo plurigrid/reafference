@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>reafference :: MHIN browser shell</title>
+  <style>
+    :root {
+      --bg: #071117;
+      --panel: rgba(13, 24, 35, 0.88);
+      --panel-strong: rgba(9, 17, 26, 0.94);
+      --line: #254056;
+      --line-soft: rgba(96, 141, 172, 0.22);
+      --text: #edf5fb;
+      --muted: #91a9bc;
+      --cyan: #6fe7ec;
+      --teal: #4cc8bb;
+      --green: #7bdb86;
+      --amber: #f5c464;
+      --rose: #ef8a8a;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    body {
+      font-family: "IBM Plex Mono", "JetBrains Mono", "Fira Code", monospace;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top right, rgba(111, 231, 236, 0.16), transparent 24%),
+        radial-gradient(circle at 12% 18%, rgba(123, 219, 134, 0.09), transparent 18%),
+        linear-gradient(180deg, #09131b 0%, #071117 52%, #050d13 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+      background-size: 32px 32px;
+      mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.9), transparent 88%);
+      opacity: 0.22;
+    }
+
+    .shell {
+      width: min(1260px, calc(100vw - 28px));
+      margin: 14px auto;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      overflow: hidden;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent),
+        rgba(4, 11, 17, 0.88);
+      box-shadow: 0 28px 90px rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(14px);
+    }
+
+    .topbar,
+    .footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 18px;
+      background: rgba(6, 12, 18, 0.92);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .footer {
+      border-bottom: 0;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      background:
+        radial-gradient(circle at 34% 34%, #b7ffff, var(--cyan) 54%, #0d4149 100%);
+      box-shadow: 0 0 18px rgba(111, 231, 236, 0.55);
+      flex: none;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      white-space: nowrap;
+    }
+
+    .brand p,
+    .meta,
+    .eyebrow,
+    .muted {
+      color: var(--muted);
+    }
+
+    .brand p {
+      margin: 2px 0 0;
+      font-size: 11px;
+      line-height: 1.45;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .meta span,
+    .scale-pill,
+    .tag {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 5px 9px;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .hero {
+      padding: 22px 18px 8px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .hero-copy {
+      display: grid;
+      gap: 12px;
+    }
+
+    .eyebrow {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .hero h2 {
+      margin: 0;
+      max-width: 12ch;
+      font-size: clamp(34px, 7vw, 78px);
+      line-height: 0.92;
+      letter-spacing: -0.04em;
+    }
+
+    .hero p {
+      margin: 0;
+      max-width: 84ch;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .hero-grid,
+    .summary-grid,
+    .content-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .hero-grid {
+      grid-template-columns: 1.25fr 0.9fr;
+      align-items: end;
+    }
+
+    .summary-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .summary-card,
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--panel);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    }
+
+    .summary-card {
+      padding: 14px;
+      display: grid;
+      gap: 8px;
+      min-height: 118px;
+    }
+
+    .summary-card strong {
+      font-size: 30px;
+      line-height: 1;
+      letter-spacing: -0.06em;
+    }
+
+    .summary-card span,
+    .summary-card p {
+      font-size: 12px;
+      line-height: 1.55;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .scale-ribbon {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .scale-pill {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .scale-pill.live {
+      border-color: rgba(111, 231, 236, 0.45);
+      color: var(--cyan);
+      background: rgba(111, 231, 236, 0.08);
+    }
+
+    .content-grid {
+      padding: 8px 18px 18px;
+      grid-template-columns: 1.18fr 0.82fr;
+    }
+
+    .left-stack,
+    .right-stack {
+      display: grid;
+      gap: 12px;
+    }
+
+    .panel {
+      padding: 16px;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .panel h3 {
+      margin: 0 0 5px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+    }
+
+    .panel p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .tag.live {
+      color: var(--green);
+      border-color: rgba(123, 219, 134, 0.45);
+    }
+
+    .mesh-table,
+    .mesh-table thead,
+    .mesh-table tbody,
+    .mesh-table tr {
+      width: 100%;
+    }
+
+    .mesh-table {
+      border-collapse: collapse;
+    }
+
+    .mesh-table th,
+    .mesh-table td {
+      padding: 10px 0;
+      border-bottom: 1px solid var(--line-soft);
+      text-align: left;
+      vertical-align: top;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .mesh-table th {
+      color: var(--muted);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .mesh-table tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 10px;
+    }
+
+    .status::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: currentColor;
+      box-shadow: 0 0 12px currentColor;
+    }
+
+    .status.nominal { color: var(--green); }
+    .status.warming { color: var(--amber); }
+    .status.alert { color: var(--rose); }
+
+    .queue-item {
+      padding: 13px 0;
+      border-bottom: 1px solid var(--line-soft);
+      display: grid;
+      gap: 7px;
+    }
+
+    .queue-item:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .queue-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .queue-item strong {
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .detail-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .detail-card {
+      padding: 12px;
+      border: 1px solid var(--line-soft);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .detail-card strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+    }
+
+    .detail-card span {
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .path-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .path-link {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 14px;
+      align-items: center;
+      padding: 14px;
+      border: 1px solid var(--line-soft);
+      border-radius: 14px;
+      text-decoration: none;
+      color: inherit;
+      background: rgba(255, 255, 255, 0.02);
+      transition: border-color 140ms ease, transform 140ms ease, background 140ms ease;
+    }
+
+    .path-link:hover {
+      border-color: rgba(111, 231, 236, 0.42);
+      transform: translateY(-1px);
+      background: rgba(111, 231, 236, 0.05);
+    }
+
+    .path-link strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .path-link span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .path-link em {
+      font-style: normal;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--amber);
+    }
+
+    .ops {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 14px;
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    @media (max-width: 980px) {
+      .hero-grid,
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .scale-ribbon {
+        justify-content: flex-start;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .shell {
+        width: min(100vw, calc(100vw - 10px));
+        margin: 5px auto;
+        border-radius: 18px;
+      }
+
+      .topbar,
+      .footer {
+        padding: 12px 14px;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero,
+      .content-grid {
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark"></div>
+        <div>
+          <h1>reafference :: Multiscale Health Innovation Network</h1>
+          <p>Ratzilla-first browser shell aligned with the terminal walking skeleton.</p>
+        </div>
+      </div>
+      <div class="meta">
+        <span>web</span>
+        <span>tui</span>
+        <span>cargo-buildable</span>
+        <span>post-web thesis</span>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <div class="eyebrow">Browser instrument</div>
+          <h2>One multiscale instrument, two hosts.</h2>
+          <p>
+            The terminal and browser now tell the same story. `tui` carries the
+            live `ratatui` walking skeleton for the Multiscale Health Innovation
+            Network, while `web` frames the ratzilla-first browser thesis around
+            the same slices: scale navigation, network mesh, work queue,
+            evidence detail, and operational state.
+          </p>
+        </div>
+
+        <div class="scale-ribbon" aria-label="MHIN scales">
+          <span class="scale-pill live">Whole Earth</span>
+          <span class="scale-pill">Population</span>
+          <span class="scale-pill">Cohort</span>
+          <span class="scale-pill">Site</span>
+          <span class="scale-pill">Patient</span>
+          <span class="scale-pill">Tissue</span>
+          <span class="scale-pill">Cell</span>
+        </div>
+      </div>
+
+      <div class="summary-grid">
+        <article class="summary-card">
+          <span>Coverage</span>
+          <strong>82%</strong>
+          <p>Whole-earth observability stitched to site and cohort operations.</p>
+        </article>
+        <article class="summary-card">
+          <span>Readiness</span>
+          <strong>74%</strong>
+          <p>Protocol and evidence handoff still need tighter site-level sync.</p>
+        </article>
+        <article class="summary-card">
+          <span>Evidence sync</span>
+          <strong>81%</strong>
+          <p>Browser and CLI should converge on the same frame and slice logic.</p>
+        </article>
+        <article class="summary-card">
+          <span>Operator mode</span>
+          <strong>Ratzilla</strong>
+          <p>Structured browser thesis over the lower-level VT transport substrate.</p>
+        </article>
+      </div>
+    </section>
+
+    <main class="content-grid">
+      <div class="left-stack">
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h3>Network mesh</h3>
+              <p>Cross-scale nodes rendered as an instrument panel instead of a dashboard.</p>
+            </div>
+            <span class="tag live">focused on whole earth</span>
+          </div>
+
+          <table class="mesh-table">
+            <thead>
+              <tr>
+                <th>Node</th>
+                <th>Layer</th>
+                <th>Focus</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Global observatory mesh</td>
+                <td>whole-earth</td>
+                <td>Sentinel climate and care covariates</td>
+                <td><span class="status nominal">nominal</span></td>
+              </tr>
+              <tr>
+                <td>Maternal outcomes federation</td>
+                <td>population</td>
+                <td>Regional risk stratification</td>
+                <td><span class="status warming">warming</span></td>
+              </tr>
+              <tr>
+                <td>Inflammation responder cohort</td>
+                <td>cohort</td>
+                <td>Responder segmentation</td>
+                <td><span class="status nominal">nominal</span></td>
+              </tr>
+              <tr>
+                <td>Causality clinic Toronto</td>
+                <td>site</td>
+                <td>Protocol coordination</td>
+                <td><span class="status alert">alert</span></td>
+              </tr>
+              <tr>
+                <td>Patient twin lattice</td>
+                <td>patient</td>
+                <td>Longitudinal intervention tracking</td>
+                <td><span class="status nominal">nominal</span></td>
+              </tr>
+              <tr>
+                <td>Spatial tissue atlas</td>
+                <td>tissue</td>
+                <td>Microenvironment gradients</td>
+                <td><span class="status warming">warming</span></td>
+              </tr>
+              <tr>
+                <td>Single-cell perturbation bank</td>
+                <td>cell</td>
+                <td>Causal mechanism inference</td>
+                <td><span class="status nominal">nominal</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h3>Work queue</h3>
+              <p>The same queue semantics used by the `ratatui` walking skeleton.</p>
+            </div>
+            <span class="tag">5 active threads</span>
+          </div>
+
+          <div class="queue-item">
+            <div class="queue-meta">
+              <span>critical</span>
+              <span>whole-earth -> cohort</span>
+              <span>ops mesh</span>
+            </div>
+            <strong>Link whole-earth shocks to cohort enrollment drift</strong>
+            <p class="muted">Join weather anomalies, supply constraints, and enrollment delay signals.</p>
+          </div>
+
+          <div class="queue-item">
+            <div class="queue-meta">
+              <span>high</span>
+              <span>site -> tissue</span>
+              <span>lab coordination</span>
+            </div>
+            <strong>Reconcile site assay lag with tissue atlas updates</strong>
+            <p class="muted">Detect whether biopsy backlog is distorting tissue-level trend estimates.</p>
+          </div>
+
+          <div class="queue-item">
+            <div class="queue-meta">
+              <span>high</span>
+              <span>patient</span>
+              <span>care intelligence</span>
+            </div>
+            <strong>Promote patient digital twin feedback loop</strong>
+            <p class="muted">Surface intervention effects before the next protocol steering meeting.</p>
+          </div>
+        </section>
+      </div>
+
+      <div class="right-stack">
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h3>Evidence detail</h3>
+              <p>The focused pane for provenance, readiness, and browser thesis notes.</p>
+            </div>
+            <span class="tag live">selected node</span>
+          </div>
+
+          <div class="detail-grid">
+            <div class="detail-card">
+              <strong>Node</strong>
+              <span>Global observatory mesh</span>
+            </div>
+            <div class="detail-card">
+              <strong>Layer</strong>
+              <span>whole-earth</span>
+            </div>
+            <div class="detail-card">
+              <strong>Focus</strong>
+              <span>Sentinel climate and care covariates for cross-scale intervention readiness.</span>
+            </div>
+            <div class="detail-card">
+              <strong>Why ratzilla first</strong>
+              <span>
+                The browser should stay a structured host for the same multiscale
+                instrument, while `restty` and byte-identical ANSI transport remain
+                the lower render and transport seam beneath it.
+              </span>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h3>Browser paths</h3>
+              <p>Three browser-facing choices, ordered by thesis strength.</p>
+            </div>
+            <span class="tag">same repo</span>
+          </div>
+
+          <div class="path-list">
+            <a class="path-link" href="../prototypes/ratzilla-surface/index.html">
+              <div>
+                <strong>Ratzilla surface</strong>
+                <span>Preferred post-web thesis: structured browser instrument with explicit surface design.</span>
+              </div>
+              <em>preferred thesis</em>
+            </a>
+
+            <a class="path-link" href="../reafferance.health/index.html">
+              <div>
+                <strong>reafferance.health</strong>
+                <span>Canonical byte-identical transport proof shared with the CLI `health` output.</span>
+              </div>
+              <em>current transport seam</em>
+            </a>
+
+            <a class="path-link" href="../prototypes/restty-world/index.html">
+              <div>
+                <strong>Restty world</strong>
+                <span>Lower-level Ghostty VT plus WebGPU rendering path for terminal-native worlds.</span>
+              </div>
+              <em>render backend</em>
+            </a>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h3>Ops rail</h3>
+              <p>The browser shell mirrors the command posture of the terminal instrument.</p>
+            </div>
+          </div>
+
+          <div class="ops">
+            <span>`cargo build`</span>
+            <span>`cargo run -p reafference-tui`</span>
+            <span>`npm run build:health`</span>
+            <span>`npm run check:health`</span>
+            <span>`bin/health --hash`</span>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer>
+      <span>MHIN walking skeleton active</span>
+      <span>Use `cargo build` from repo root to compile both workspace members.</span>
+    </footer>
+  </div>
+</body>
+</html>
