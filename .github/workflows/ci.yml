@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  workflow_call:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-check:
+    name: Build & Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check health
+        run: npm run check:health
+
+      - name: Build health
+        run: npm run build:health
+
+      - name: Verify build output exists
+        run: |
+          if [ ! -d "build/health" ] || [ -z "$(ls -A build/health 2>/dev/null)" ]; then
+            echo "::error::build/health is empty or missing"
+            exit 1
+          fi
+          echo "Build output OK: $(find build/health -type f | wc -l) files"
